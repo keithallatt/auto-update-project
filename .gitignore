@@ -24,3 +24,6 @@ hs_err_pid*
 
 # ignore git repository
 repo/
+
+# ignore pycharm directory
+.idea/
