@@ -1,35 +1,35 @@
-import subprocess
-from subprocess import check_output
+from subprocess import *
 import os
 import shutil
 import json
 import errno
 
-# import sys
-# system_arguments = sys.argv[1:]
+import sys
+system_arguments = sys.argv[1:]
 
-_json_variables = dict(json.loads("\n".join(open("./properties.json", "r").readlines())))
+if not ("properties.json" in os.listdir(".")):
+    exit(errno.ENOENT)  # No such file or directory
 
-current_working_directory = os.getcwd()
+properties_file = open("./properties.json", "r")
 
+_json_variables = dict(json.loads("\n".join(properties_file.readlines())))
 
-def last_commit_id():
-    return str(_json_variables["last update commit"])
-
-
-def local_code_repository():
-    return str(_json_variables["local code repository"])
+working_directory = os.getcwd()
 
 
-def global_code_repository():
-    return str(_json_variables["global code repository"])
+def last_commit_id(): return str(_json_variables.get("last update commit", "No Last Commit"))
 
 
-def main_file():
-    return str(_json_variables.get("main file", ""))
+def local_code_repository(): return str(_json_variables["local code repository"])
 
 
-OUTPUT = print
+def global_code_repository(): return str(_json_variables["global code repository"])
+
+
+def main_file(): return str(_json_variables.get("main file", ""))
+
+
+output = print
 
 """
 Detects whether or not there is an internet connection. 
@@ -71,16 +71,16 @@ if connected_to_internet:
 
     # if repo exists
     if local_code_repository().split("/")[-1] in os.listdir("."):
-        OUTPUT(local_code_repository()+" exists")
+        output(local_code_repository()+" exists")
         os.chdir(local_code_repository())
 
         # check if there was an update.
-        subprocess.Popen(["git", "remote", "update"], stdout=subprocess.PIPE)
+        Popen(["git", "remote", "update"], stdout=PIPE)
 
         out = check_output(["git", "status", "-uno"]).decode("utf-8")
 
-        # OUTPUT log history
-        OUTPUT("\n".join(out.split("\n")[0:2]))
+        # output log history
+        output("\n".join(out.split("\n")[0:2]))
 
         out = out.split("\n")[1]
 
@@ -93,12 +93,12 @@ if connected_to_internet:
 
     # if repo doesn't exist, an update is required, there is no code.
     else:
-        OUTPUT(local_code_repository()+" does not exist")
+        output(local_code_repository()+" does not exist")
 
         update_required = True
 
     # display if an update is required
-    OUTPUT("Update Available" if update_required else "Update Not Available")
+    output("Update Available" if update_required else "Update Not Available")
 
     # If there was, update the property
     if update_required:
@@ -115,17 +115,17 @@ os.chdir(local_code_repository())
 
 ########################################################################################################################
 
-OUTPUT("Cleaning the directory...")
-subprocess.Popen(["git", "clean", "-df"], stdout=subprocess.PIPE).wait()
-OUTPUT("Done.")
+output("Cleaning the directory...")
+Popen(["git", "clean", "-df"], stdout=PIPE).wait()
+output("Done.")
 
 ########################################################################################################################
 
 if connected_to_internet and update_required:
     # git pull of all the source
-    process = subprocess.Popen(["git", "pull"], stdout=subprocess.PIPE)
+    process = Popen(["git", "pull"], stdout=PIPE)
     process.wait()
-    process = subprocess.Popen(["git", "checkout", "."], stdout=subprocess.PIPE)
+    process = Popen(["git", "checkout", "."], stdout=PIPE)
     process.wait()
     output = process.communicate()[0]
 
@@ -133,15 +133,15 @@ if connected_to_internet and update_required:
     # if it doesn't..
     if len(list(filter(lambda x: x[0] != ".", os.listdir(".")))) == 0:
         shutil.rmtree(str(os.getcwd()), ignore_errors=True)
-        os.chdir(current_working_directory)
+        os.chdir(working_directory)
 
         # clone the whole repository after deleting.
-        subprocess.Popen(["git", "clone", global_code_repository()], stdout=subprocess.PIPE).wait()
+        Popen(["git", "clone", global_code_repository()], stdout=PIPE).wait()
 
         os.chdir(local_code_repository())
 
 # grab properties.json
-os.chdir(current_working_directory)
+os.chdir(working_directory)
 if "properties.json" in os.listdir(local_code_repository()):
     _json_variables_from_repo = \
         dict(json.loads("\n".join(open(local_code_repository()+"/properties.json", "r").readlines())))
@@ -157,29 +157,29 @@ for f in os.listdir("."):
         if main_file() == "":
             f_contents = "\n".join(open(f).readlines())
             if "public static void main(String[]" in f_contents:
-                MAIN_FILE = f
+                _json_variables["main file"] = f
 
-        subprocess.Popen(["javac", f], stdout=subprocess.PIPE).wait()
+        Popen(["javac", f], stdout=PIPE).wait()
 
 
 ########################################################################################################################
 
 # Check if main file found.
 if main_file() == "":
-    OUTPUT("Could not find main file.")
+    output("Could not find main file.")
     exit(errno.ENOENT)  # No such file or directory
 elif main_file() in os.listdir("."):
-    OUTPUT("Found main file:\t" + main_file())
+    output("Found main file:\t" + main_file())
 else:
-    OUTPUT("Specified main file not in repo:\t"+main_file()+"?")
+    output("Specified main file not in local repository:\t"+main_file()+"?")
     exit(errno.ENOENT)  # No such file or directory
 
-OUTPUT("Updating JSON file.")
-json_file = open(current_working_directory+"/properties.json", "w")
+output("Updating JSON file.")
+json_file = open(working_directory+"/properties.json", "w")
 json_file.write(json.dumps(_json_variables, indent=4, sort_keys=True))
 json_file.close()
 
 # Run the project if main file found and updates went smoothly.
-OUTPUT("Running project.")
-subprocess.Popen(["java", main_file().replace(".java", "")], stdout=subprocess.PIPE)
-os.chdir(current_working_directory)
+output("Running project.")
+Popen(["java", main_file().replace(".java", "")], stdout=PIPE)
+os.chdir(working_directory)
