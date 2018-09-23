@@ -7,7 +7,10 @@ import errno
 import sys
 system_arguments = sys.argv[1:]
 
+output = print
+
 if not ("properties.json" in os.listdir(".")):
+    output("File './properties.json' does not exist:")
     exit(errno.ENOENT)  # No such file or directory
 
 properties_file = open("./properties.json", "r")
@@ -16,26 +19,30 @@ _json_variables = dict(json.loads("\n".join(properties_file.readlines())))
 
 working_directory = os.getcwd()
 
+os.chdir(str(_json_variables["local code repository"]))
 
-def last_commit_id(): return str(_json_variables.get("last update commit", "No Last Commit"))
+local_code_repository = os.getcwd()
 
-
-def local_code_repository(): return str(_json_variables["local code repository"])
-
-
-def global_code_repository(): return str(_json_variables["global code repository"])
+os.chdir(working_directory)
 
 
-def main_file(): return str(_json_variables.get("main file", ""))
+def last_commit_id():
+    return str(_json_variables.get("last update commit", "No Last Commit"))
 
 
-output = print
+def global_code_repository():
+    return str(_json_variables["global code repository"])
+
+
+def main_file():
+    return str(_json_variables.get("main file", ""))
+
 
 """
 Detects whether or not there is an internet connection. 
 
-If a HEAD request to google doesn't return a 'getaddrinfo()' error / 'gaierror', the HEAD request made it to 
-www.google.com and returned.
+If a HEAD request to google doesn't return a 'getaddrinfo()' error / 
+'gaierror', the HEAD request made it to www.google.com and returned.
 """
 
 
@@ -57,7 +64,6 @@ def __have_internet__():
 
 connected_to_internet = __have_internet__()
 
-########################################################################################################################
 
 """
 Find the last-update file, to know when the last update was.
@@ -70,9 +76,9 @@ if connected_to_internet:
     out = last_commit_id()
 
     # if repo exists
-    if local_code_repository().split("/")[-1] in os.listdir("."):
-        output(local_code_repository()+" exists")
-        os.chdir(local_code_repository())
+    if local_code_repository.split("/")[-1] in os.listdir("."):
+        output(local_code_repository+" exists")
+        os.chdir(local_code_repository)
 
         # check if there was an update.
         Popen(["git", "remote", "update"], stdout=PIPE)
@@ -85,7 +91,8 @@ if connected_to_internet:
         out = out.split("\n")[1]
 
         _json_variables["last update commit"] = \
-            check_output(["git", "log", "--format=\"%H\"", "-n", "1"]).decode("utf-8").replace("\"", "")
+            check_output(["git", "log", "--format=\"%H\"", "-n", "1"])\
+                .decode("utf-8").replace("\"", "")
 
         os.chdir("..")
 
@@ -93,7 +100,7 @@ if connected_to_internet:
 
     # if repo doesn't exist, an update is required, there is no code.
     else:
-        output(local_code_repository()+" does not exist")
+        output(local_code_repository+" does not exist")
 
         update_required = True
 
@@ -105,21 +112,19 @@ if connected_to_internet:
         _json_variables["last update commit"] = out
 
 
-########################################################################################################################
-
-#
-if not(local_code_repository().split("/")[-1] in os.listdir(".")):
-    os.makedirs(local_code_repository())
-os.chdir(local_code_repository())
+# If the local code repository is not
+if not(local_code_repository.split("/")[-1] in os.listdir(".")):
+    os.makedirs(local_code_repository)
+os.chdir(local_code_repository)
 
 
-########################################################################################################################
+###############################################################################
 
 output("Cleaning the directory...")
 Popen(["git", "clean", "-df"], stdout=PIPE).wait()
 output("Done.")
 
-########################################################################################################################
+###############################################################################
 
 if connected_to_internet and update_required:
     # git pull of all the source
@@ -138,19 +143,21 @@ if connected_to_internet and update_required:
         # clone the whole repository after deleting.
         Popen(["git", "clone", global_code_repository()], stdout=PIPE).wait()
 
-        os.chdir(local_code_repository())
+        os.chdir(local_code_repository)
 
 # grab properties.json
 os.chdir(working_directory)
-if "properties.json" in os.listdir(local_code_repository()):
+if "properties.json" in os.listdir(local_code_repository):
     _json_variables_from_repo = \
-        dict(json.loads("\n".join(open(local_code_repository()+"/properties.json", "r").readlines())))
+        dict(json.loads("\n".join(
+            open(local_code_repository+"/properties.json", "r").readlines())))
     for k, v in _json_variables_from_repo.items():
         print("Updated Property:", repr(k), ":", repr(v))
         _json_variables[k] = v
-os.chdir(local_code_repository())
+os.chdir(local_code_repository)
 
-# recompile all the java files in-case they are compiled versions of the old code.
+# recompile all the java files in-case
+# they are compiled versions of the old code.
 for f in os.listdir("."):
     # ends with .java but is not a file named '.java'
     if f.endswith(".java") and f != ".java":
@@ -162,7 +169,7 @@ for f in os.listdir("."):
         Popen(["javac", f], stdout=PIPE).wait()
 
 
-########################################################################################################################
+###############################################################################
 
 # Check if main file found.
 if main_file() == "":
