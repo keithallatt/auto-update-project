@@ -1,10 +1,12 @@
-from subprocess import *
+import errno
+from http import client as http_lib
+import json
 import os
 import shutil
-import json
-import errno
-
+import socket
+from subprocess import *
 import sys
+
 system_arguments = sys.argv[1:]
 
 output = print
@@ -45,29 +47,17 @@ If a HEAD request to google doesn't return a 'getaddrinfo()' error /
 'gaierror', the HEAD request made it to www.google.com and returned.
 """
 
-
-def __have_internet__():
-    import socket
-    import http.client as http_lib
-
-    # create connection
-    conn = http_lib.HTTPConnection("www.google.com", timeout=5)
-    try:
-        # create a HEAD request
-        conn.request("HEAD", "/")
-        conn.close()
-        return True
-    except socket.gaierror:
-        conn.close()
-        return False
+# create connection
+conn = http_lib.HTTPConnection("www.google.com", timeout=5)
+try:
+    # create a HEAD request
+    conn.request("HEAD", "/")
+    connected_to_internet = True
+except socket.gaierror:
+    connected_to_internet = False
+conn.close()
 
 
-connected_to_internet = __have_internet__()
-
-
-"""
-Find the last-update file, to know when the last update was.
-"""
 update_required = False
 
 # no update if there is no internet
@@ -75,14 +65,17 @@ if connected_to_internet:
     # default value, changed when checking output
     out = last_commit_id()
 
-    # if repo exists
+    # if the repository exists
     if local_code_repository.split("/")[-1] in os.listdir("."):
         output(local_code_repository+" exists")
         os.chdir(local_code_repository)
 
-        # check if there was an update.
+        # Fetch updates for remotes or remote groups in the
+        # repository as defined by remotes.
         Popen(["git", "remote", "update"], stdout=PIPE)
 
+        # git status -uno -> untracked files: mode = no,
+        # Show no untracked files.
         out = check_output(["git", "status", "-uno"]).decode("utf-8")
 
         # output log history
