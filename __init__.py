@@ -11,13 +11,14 @@ system_arguments = sys.argv[1:]
 
 output = print
 
+
 if not ("properties.json" in os.listdir(".")):
     output("File './properties.json' does not exist:")
     exit(errno.ENOENT)  # No such file or directory
 
 properties_file = open("./properties.json", "r")
 
-_json_variables = dict(json.loads("\n".join(properties_file.readlines())))
+_json_variables = dict(json.loads("".join(properties_file.readlines())))
 
 working_directory = os.getcwd()
 
@@ -38,6 +39,21 @@ def global_code_repository():
 
 def main_file():
     return str(_json_variables.get("main file", ""))
+
+
+project_languages = _json_variables.get("project languages", [])
+
+__project_language_extensions__ = _json_variables.get("language extensions")
+__project_language_extensions__ = dict(__project_language_extensions__)
+
+project_language_extensions = []
+
+for language in project_languages:
+    project_language_extensions += \
+        list(__project_language_extensions__[language])
+
+print(project_languages)
+print(project_language_extensions)
 
 
 """
@@ -62,8 +78,9 @@ update_required = False
 
 # no update if there is no internet
 if connected_to_internet:
+    output("Connected to internet.")
     # default value, changed when checking output
-    out = last_commit_id()
+    last_commit = last_commit_id()
 
     # if the repository exists
     if local_code_repository.split("/")[-1] in os.listdir("."):
@@ -72,22 +89,25 @@ if connected_to_internet:
 
         # Fetch updates for remotes or remote groups in the
         # repository as defined by remotes.
-        Popen(["git", "remote", "update"], stdout=PIPE)
+        Popen(["git", "remote", "update"], stdout=PIPE).wait()
 
         # git status -uno -> untracked files: mode = no,
         # Show no untracked files.
-        out = check_output(["git", "status", "-uno"]).decode("utf-8")
+        out = check_output(["git", "status"]).decode("utf-8")
+
 
         # output log history
-        output("\n".join(out.split("\n")[0:2]))
+        output("\n".join(out.split("\n")[:10]))
 
         out = out.split("\n")[1]
 
         _json_variables["last update commit"] = \
             check_output(["git", "log", "--format=\"%H\"", "-n", "1"])\
-                .decode("utf-8").replace("\"", "")
+            .decode("utf-8").replace("\"", "")
 
         os.chdir("..")
+
+        output("\n#1\n"+out+"\n#1\n")
 
         update_required = "Your branch is behind" in out
 
@@ -102,7 +122,7 @@ if connected_to_internet:
 
     # If there was, update the property
     if update_required:
-        _json_variables["last update commit"] = out
+        _json_variables["last update commit"] = out.strip()
 
 
 # If the local code repository is not
@@ -119,13 +139,14 @@ output("Done.")
 
 ###############################################################################
 
+output("Connected: "+str(connected_to_internet))
+output("Update: "+str(update_required))
+
 if connected_to_internet and update_required:
     # git pull of all the source
-    process = Popen(["git", "pull"], stdout=PIPE)
-    process.wait()
-    process = Popen(["git", "checkout", "."], stdout=PIPE)
-    process.wait()
-    output = process.communicate()[0]
+    Popen(["git", "checkout", "."], stdout=PIPE).wait()
+    Popen(["git", "pull"], stdout=PIPE).wait()
+    output("Git Pull Request to 'origin/master'")
 
     # check if it downloaded.
     # if it doesn't..
@@ -155,7 +176,7 @@ for f in os.listdir("."):
     # ends with .java but is not a file named '.java'
     if f.endswith(".java") and f != ".java":
         if main_file() == "":
-            f_contents = "\n".join(open(f).readlines())
+            f_contents = "".join(open(f).readlines())
             if "public static void main(String[]" in f_contents:
                 _json_variables["main file"] = f
 
@@ -170,6 +191,10 @@ if main_file() == "":
     exit(errno.ENOENT)  # No such file or directory
 elif main_file() in os.listdir("."):
     output("Found main file:\t" + main_file())
+
+    f_contents = "".join(open(main_file(), "r").readlines())
+
+    output("\n#2\n"+f_contents+"\n#2\n")
 else:
     output("Specified main file not in local repository:\t"+main_file()+"?")
     exit(errno.ENOENT)  # No such file or directory
@@ -181,5 +206,5 @@ json_file.close()
 
 # Run the project if main file found and updates went smoothly.
 output("Running project.")
-Popen(["java", main_file().replace(".java", "")], stdout=PIPE)
+Popen(["java", main_file().replace(".java", "")], stdout=PIPE).wait()
 os.chdir(working_directory)
