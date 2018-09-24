@@ -1,4 +1,9 @@
 {
+    "language extensions" : {
+        "Python" : [".py"],
+        "Java" : [".java", ".class"]
+    },
+    "project languages" : ["Java"],
     "global code repository": "https://github.com/keithallatt/repo.git",
     "last update commit": "770b8091d78407857f01033ce06471e980bd22d6\n",
     "local code repository": "./repo",
