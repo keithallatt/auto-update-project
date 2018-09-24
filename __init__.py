@@ -82,7 +82,8 @@ try:
     connected_to_internet = True
 except socket.gaierror:
     connected_to_internet = False
-conn.close()
+finally:
+    conn.close()
 
 
 update_required = False
@@ -105,7 +106,6 @@ if connected_to_internet:
         # git status -uno -> untracked files: mode = no,
         # Show no untracked files.
         out = check_output(["git", "status"]).decode("utf-8")
-
 
         # output log history
         output("\n".join(out.split("\n")[:10])+"\t.\n\t.\n\t.\n")
@@ -132,6 +132,8 @@ if connected_to_internet:
     # If there was, update the property
     if update_required:
         _json_variables["last update commit"] = out.strip()
+else:
+    output("No Internet Connection")
 
 
 # If the local code repository is not
