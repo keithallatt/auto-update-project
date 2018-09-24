@@ -22,11 +22,18 @@ _json_variables = dict(json.loads("".join(properties_file.readlines())))
 
 working_directory = os.getcwd()
 
-os.chdir(str(_json_variables["local code repository"]))
+local_code_repository = (str(_json_variables["local code repository"]))
 
-local_code_repository = os.getcwd()
+if local_code_repository.startswith(".."):
+    output("File Path Not Formatted Correctly")
+    exit(10)  # Find write errno code
+if not local_code_repository.startswith("."):
+    output("File Path Not Formatted Correctly")
+    exit(10)  # Find write errno code
 
-os.chdir(working_directory)
+local_code_repository = local_code_repository[1:]
+
+local_code_repository = os.getcwd()+local_code_repository
 
 
 def last_commit_id():
@@ -84,7 +91,7 @@ update_required = False
 if connected_to_internet:
     output("Connected to internet.")
     # default value, changed when checking output
-    last_commit = last_commit_id()
+    out = last_commit_id()
 
     # if the repository exists
     if local_code_repository.split("/")[-1] in os.listdir("."):
@@ -146,8 +153,8 @@ output("Update: "+str(update_required))
 
 if connected_to_internet and update_required:
     # git pull of all the source
-    Popen(["git", "checkout", "."], stdout=PIPE).wait()
     Popen(["git", "pull"], stdout=PIPE).wait()
+    Popen(["git", "checkout", "."], stdout=PIPE).wait()
     output("Git Pull Request to 'origin/master'")
 
     # check if it downloaded.
