@@ -41,19 +41,23 @@ def main_file():
     return str(_json_variables.get("main file", ""))
 
 
-project_languages = _json_variables.get("project languages", [])
+try:
+    project_languages = _json_variables.get("project languages", [])
 
-__project_language_extensions__ = _json_variables.get("language extensions")
-__project_language_extensions__ = dict(__project_language_extensions__)
+    __project_language_extensions__ = _json_variables.get("language extensions")
+    __project_language_extensions__ = dict(__project_language_extensions__)
 
-project_language_extensions = []
+    project_language_extensions = []
 
-for language in project_languages:
-    project_language_extensions += \
-        list(__project_language_extensions__[language])
+    for language in project_languages:
+        project_language_extensions += \
+            list(__project_language_extensions__[language])
 
-print(project_languages)
-print(project_language_extensions)
+    output("Project Languages", project_languages)
+    output("Project Extensions", project_language_extensions)
+except TypeError:
+    output("Error occured, project languages not configured.")
+    pass
 
 
 """
@@ -97,7 +101,7 @@ if connected_to_internet:
 
 
         # output log history
-        output("\n".join(out.split("\n")[:10]))
+        output("\n".join(out.split("\n")[:10])+"\t.\n\t.\n\t.\n")
 
         out = out.split("\n")[1]
 
@@ -106,8 +110,6 @@ if connected_to_internet:
             .decode("utf-8").replace("\"", "")
 
         os.chdir("..")
-
-        output("\n#1\n"+out+"\n#1\n")
 
         update_required = "Your branch is behind" in out
 
@@ -166,7 +168,7 @@ if "properties.json" in os.listdir(local_code_repository):
         dict(json.loads("\n".join(
             open(local_code_repository+"/properties.json", "r").readlines())))
     for k, v in _json_variables_from_repo.items():
-        print("Updated Property:", repr(k), ":", repr(v))
+        output("Updated Property:", repr(k), ":", repr(v))
         _json_variables[k] = v
 os.chdir(local_code_repository)
 
@@ -192,9 +194,16 @@ if main_file() == "":
 elif main_file() in os.listdir("."):
     output("Found main file:\t" + main_file())
 
-    f_contents = "".join(open(main_file(), "r").readlines())
+    f_contents = open(main_file(), "r").readlines()
 
-    output("\n#2\n"+f_contents+"\n#2\n")
+    line_divide = 18
+    line_end = 21
+    while (len(f_contents) > line_end):
+        f_contents.pop(line_divide)
+    f_contents[line_divide] = "\t.\n\t.\n\t.\n"
+    f_contents = "".join(f_contents)
+
+    output("\n\n"+f_contents+"\n\n")
 else:
     output("Specified main file not in local repository:\t"+main_file()+"?")
     exit(errno.ENOENT)  # No such file or directory
