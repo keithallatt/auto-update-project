@@ -26,10 +26,12 @@ local_code_repository = (str(_json_variables["local code repository"]))
 
 if local_code_repository.startswith(".."):
     output("File Path Not Formatted Correctly")
-    exit(10)  # Find write errno code
+    exit(errno.EFTYPE)  # Find write errno code
 if not local_code_repository.startswith("."):
-    output("File Path Not Formatted Correctly")
-    exit(10)  # Find write errno code
+    if local_code_repository.startswith("/"):
+        local_code_repository = "."+local_code_repository
+    else:
+        local_code_repository = "./" + local_code_repository
 
 local_code_repository = local_code_repository[1:]
 
@@ -48,6 +50,8 @@ def main_file():
     return str(_json_variables.get("main file", ""))
 
 
+project_languages = []
+project_language_extensions = []
 try:
     project_languages = _json_variables.get("project languages", [])
 
@@ -57,8 +61,8 @@ try:
     project_language_extensions = []
 
     for language in project_languages:
-        project_language_extensions += \
-            list(__project_language_extensions__[language])
+        project_language_extensions.append(
+            list(__project_language_extensions__[language]))
 
     output("Project Languages", project_languages)
     output("Project Extensions", project_language_extensions)
@@ -80,7 +84,7 @@ try:
     # create a HEAD request
     conn.request("HEAD", "/")
     connected_to_internet = True
-except socket.gaierror:
+except socket.gaierror or socket.timeout:
     connected_to_internet = False
 finally:
     conn.close()
@@ -205,9 +209,9 @@ elif main_file() in os.listdir("."):
 
     f_contents = open(main_file(), "r").readlines()
 
-    line_divide = 18
-    line_end = 21
-    while (len(f_contents) > line_end):
+    line_end = min(21, len(f_contents))
+    line_divide = line_end-3
+    while len(f_contents) > line_end:
         f_contents.pop(line_divide)
     f_contents[line_divide] = "\t.\n\t.\n\t.\n"
     f_contents = "".join(f_contents)
@@ -224,5 +228,14 @@ json_file.close()
 
 # Run the project if main file found and updates went smoothly.
 output("Running project.")
-Popen(["java", main_file().replace(".java", "")], stdout=PIPE).wait()
+
+# if project is written in java
+if main_file().endswith("java"):
+    Popen(["java", main_file().replace(".java", "")], stdout=PIPE).wait()
+if main_file().endswith("py"):
+    py_ver = "python3"
+    if "python2" in [to.lower() for to in project_languages]:
+        py_ver = "python2"
+    Popen(["python3", main_file()], stdout=PIPE).wait()
+
 os.chdir(working_directory)
