@@ -8,10 +8,10 @@
             ".py"
         ]
     },
-    "last update commit": "3114636092fe96b1197cf0df9af43c0aa1668700\n",
+    "last update commit": "Your branch is behind 'origin/master' by 1 commit, and can be fast-forwarded.",
     "local code repository": "./repo",
-    "main file": "java_class.java",
+    "main file": "python_script.py",
     "project languages": [
-        "Java"
+        "Python"
     ]
 }
