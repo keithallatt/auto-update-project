@@ -27,3 +27,6 @@ repo/
 
 # ignore pycharm directory
 .idea/
+
+# ignore UML
+UML/
