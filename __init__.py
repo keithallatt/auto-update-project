@@ -50,27 +50,6 @@ def main_file():
     return str(_json_variables.get("main file", ""))
 
 
-project_languages = []
-project_language_extensions = []
-try:
-    project_languages = _json_variables.get("project languages", [])
-
-    __project_language_extensions__ = _json_variables.get("language extensions")
-    __project_language_extensions__ = dict(__project_language_extensions__)
-
-    project_language_extensions = []
-
-    for language in project_languages:
-        project_language_extensions.append(
-            list(__project_language_extensions__[language]))
-
-    output("Project Languages", project_languages)
-    output("Project Extensions", project_language_extensions)
-except TypeError:
-    output("Error occured, project languages not configured.")
-    pass
-
-
 """
 Detects whether or not there is an internet connection. 
 
@@ -173,6 +152,29 @@ if connected_to_internet and update_required:
         Popen(["git", "clone", global_code_repository()], stdout=PIPE).wait()
 
         os.chdir(local_code_repository)
+
+project_languages = []
+project_language_extensions = []
+try:
+    project_languages = _json_variables.get("project languages", [])
+
+    __project_language_extensions__ = _json_variables.get(
+        "language extensions")
+    __project_language_extensions__ = dict(__project_language_extensions__)
+
+    project_language_extensions = []
+
+    for language in project_languages:
+        project_language_extensions.append(
+            list(__project_language_extensions__[language]))
+
+    project_language_extensions = sum(project_language_extensions, [])
+
+    output("Project Languages", project_languages)
+    output("Project Extensions", project_language_extensions)
+except TypeError:
+    output("Error occurred, project languages not configured.")
+    pass
 
 # grab properties.json
 os.chdir(working_directory)
