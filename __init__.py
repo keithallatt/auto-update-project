@@ -15,7 +15,7 @@ system_arguments = sys.argv[1:]
 
 output = print
 
-loading_bar_max = 15
+loading_bar_max = 16
 
 class SplashScreen():
     def __init__(self, master):
@@ -36,6 +36,18 @@ class SplashScreen():
 
 
 root = Tk()
+
+w = 350  # width for the Tk root
+h = 125  # height for the Tk root
+
+# calculate x and y coordinates for the Tk root window
+x = (root.winfo_screenwidth() - w) / 2
+y = (root.winfo_screenheight() - h - 200) / 2
+
+# set the dimensions of the screen
+# and where it is placed
+root.geometry('%dx%d+%d+%d' % (w, h, x, y))
+
 splash_screen = SplashScreen(root)
 root.update()
 root.update_idletasks()
