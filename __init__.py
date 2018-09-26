@@ -2,6 +2,7 @@ import errno
 from http import client as http_lib
 import json
 import os
+from pathlib import *
 import shutil
 import socket
 from subprocess import *
@@ -35,7 +36,7 @@ if not local_code_repository.startswith("."):
 
 local_code_repository = local_code_repository[1:]
 
-local_code_repository = os.getcwd()+local_code_repository
+local_code_repository = Path(os.getcwd()+local_code_repository)
 
 
 def last_commit_id():
@@ -78,9 +79,9 @@ if connected_to_internet:
     out = last_commit_id()
 
     # if the repository exists
-    if local_code_repository.split("/")[-1] in os.listdir("."):
-        output(local_code_repository+" exists")
-        os.chdir(local_code_repository)
+    if local_code_repository.name in os.listdir("."):
+        output(local_code_repository, "exists")
+        os.chdir(local_code_repository.absolute())
 
         # Fetch updates for remotes or remote groups in the
         # repository as defined by remotes.
@@ -105,7 +106,7 @@ if connected_to_internet:
 
     # if repo doesn't exist, an update is required, there is no code.
     else:
-        output(local_code_repository+" does not exist")
+        output(local_code_repository, "does not exist")
 
         update_required = True
 
@@ -120,18 +121,15 @@ else:
 
 
 # If the local code repository is not
-if not(local_code_repository.split("/")[-1] in os.listdir(".")):
-    os.makedirs(local_code_repository)
-os.chdir(local_code_repository)
+if not(local_code_repository.name in os.listdir(".")):
+    os.makedirs(local_code_repository.absolute())
+os.chdir(local_code_repository.absolute())
 
-
-###############################################################################
 
 output("Cleaning the directory...")
 Popen(["git", "clean", "-df"], stdout=PIPE).wait()
 output("Done.")
 
-###############################################################################
 
 output("Connected: "+str(connected_to_internet))
 output("Update: "+str(update_required))
@@ -151,7 +149,7 @@ if connected_to_internet and update_required:
         # clone the whole repository after deleting.
         Popen(["git", "clone", global_code_repository()], stdout=PIPE).wait()
 
-        os.chdir(local_code_repository)
+        os.chdir(local_code_repository.absolute())
 
 project_languages = []
 project_language_extensions = []
@@ -178,14 +176,14 @@ except TypeError:
 
 # grab properties.json
 os.chdir(working_directory)
-if "properties.json" in os.listdir(local_code_repository):
+if "properties.json" in local_code_repository.iterdir():
     _json_variables_from_repo = \
         dict(json.loads("\n".join(
-            open(local_code_repository+"/properties.json", "r").readlines())))
+            open(local_code_repository / "properties.json", "r").readlines())))
     for k, v in _json_variables_from_repo.items():
         output("Updated Property:", repr(k), ":", repr(v))
         _json_variables[k] = v
-os.chdir(local_code_repository)
+os.chdir(local_code_repository.absolute())
 
 # recompile all the java files in-case
 # they are compiled versions of the old code.
@@ -199,8 +197,6 @@ for f in os.listdir("."):
 
         Popen(["javac", f], stdout=PIPE).wait()
 
-
-###############################################################################
 
 # Check if main file found.
 if main_file() == "":
