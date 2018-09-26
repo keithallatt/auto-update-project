@@ -22,15 +22,17 @@ class SplashScreen():
         self.master = master
         master.title("Loading")
 
-        self.label = Label(master, text="Loading", width=30,
-                           height=2)
+        self.label = Label(master, text="Loading", width=30, height=2)
         self.label.pack()
 
         self.mpb = ttk.Progressbar(master, orient="horizontal", length=200,
-                              mode="determinate")
+                                   mode="determinate")
         self.mpb.pack()
         self.mpb["maximum"] = loading_bar_max
         self.mpb["value"] = 0
+
+        self.percentage_done = Label(master, text="0%", width=30, height=2)
+        self.percentage_done.pack()
 
 
 root = Tk()
@@ -48,6 +50,9 @@ def increment_loading(text_change=None, update_to_full=False, delay=0.05):
         exit(1)
     if not (text_change is None):
         splash_screen.label.config(text=text_change)
+    splash_screen.percentage_done.config(
+        text=str((splash_screen.mpb["value"] * 100) //
+                 splash_screen.mpb["maximum"])+"%")
     root.update()
     root.update_idletasks()
     time.sleep(delay)
