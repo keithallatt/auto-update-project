@@ -6,13 +6,54 @@ from pathlib import *
 import shutil
 import socket
 from subprocess import *
+from tkinter import ttk
+from tkinter import *
+import time
 import sys
 
 system_arguments = sys.argv[1:]
 
 output = print
 
+loading_bar_max = 15
 
+class SplashScreen():
+    def __init__(self, master):
+        self.master = master
+        master.title("Loading")
+
+        self.label = Label(master, text="Loading", width=30,
+                           height=2)
+        self.label.pack()
+
+        self.mpb = ttk.Progressbar(master, orient="horizontal", length=200,
+                              mode="determinate")
+        self.mpb.pack()
+        self.mpb["maximum"] = loading_bar_max
+        self.mpb["value"] = 0
+
+
+root = Tk()
+splash_screen = SplashScreen(root)
+root.update()
+root.update_idletasks()
+
+
+def increment_loading(text_change=None, update_to_full=False, delay=0.05):
+    splash_screen.mpb["value"] += 1
+    if update_to_full:
+        splash_screen.mpb["value"] = splash_screen.mpb["maximum"]
+    if splash_screen.mpb["value"] > splash_screen.mpb["maximum"]:
+        sys.stderr.print("Loading Bar Value Exceeded Maximum")
+        exit(1)
+    if not (text_change is None):
+        splash_screen.label.config(text=text_change)
+    root.update()
+    root.update_idletasks()
+    time.sleep(delay)
+
+
+increment_loading("Updating Properties.")
 if not ("properties.json" in os.listdir(".")):
     output("File './properties.json' does not exist:")
     exit(errno.ENOENT)  # No such file or directory
@@ -62,6 +103,7 @@ If a HEAD request to google doesn't return a 'getaddrinfo()' error /
 'gaierror', the HEAD request made it to www.google.com and returned.
 """
 
+increment_loading("Checking Internet.")
 # create connection
 conn = http_lib.HTTPConnection("www.google.com", timeout=5)
 try:
@@ -87,6 +129,7 @@ if connected_to_internet:
         output(local_code_repository, "exists")
         os.chdir(local_code_repository.absolute())
 
+        increment_loading("Updating remotes.")
         # Fetch updates for remotes or remote groups in the
         # repository as defined by remotes.
         Popen(["git", "remote", "update"], stdout=PIPE).wait()
@@ -130,6 +173,7 @@ if not(local_code_repository.name in os.listdir(".")):
 os.chdir(local_code_repository.absolute())
 
 
+increment_loading("Cleaning the local directory.")
 output("Cleaning the directory...")
 Popen(["git", "clean", "-df"], stdout=PIPE).wait()
 output("Done.")
@@ -139,6 +183,7 @@ output("Connected: "+str(connected_to_internet))
 output("Update: "+str(update_required))
 
 if connected_to_internet and update_required:
+    increment_loading("Updating from git.")
     # git pull of all the source
     Popen(["git", "pull"], stdout=PIPE).wait()
     Popen(["git", "checkout", "."], stdout=PIPE).wait()
@@ -150,6 +195,7 @@ if connected_to_internet and update_required:
         shutil.rmtree(str(os.getcwd()), ignore_errors=True)
         os.chdir(working_directory)
 
+        increment_loading("Cloning the repository.")
         # clone the whole repository after deleting.
         Popen(["git", "clone", global_code_repository()], stdout=PIPE).wait()
 
@@ -158,6 +204,7 @@ if connected_to_internet and update_required:
 project_languages = []
 project_language_extensions = []
 try:
+    increment_loading("Checking project languages.")
     project_languages = _json_variables.get("project languages", [])
 
     __project_language_extensions__ = _json_variables.get(
@@ -181,6 +228,7 @@ except TypeError:
 # grab properties.json
 os.chdir(working_directory)
 if "properties.json" in local_code_repository.iterdir():
+    increment_loading("Updating properties from git.")
     _json_variables_from_repo = \
         dict(json.loads("\n".join(
             open(local_code_repository / "properties.json", "r").readlines())))
@@ -189,6 +237,8 @@ if "properties.json" in local_code_repository.iterdir():
         _json_variables[k] = v
 os.chdir(local_code_repository.absolute())
 
+
+increment_loading("Compiling code.")
 # recompile all the java files in-case
 # they are compiled versions of the old code.
 for f in os.listdir("."):
@@ -223,6 +273,7 @@ else:
     output("Specified main file not in local repository:\t"+main_file()+"?")
     exit(errno.ENOENT)  # No such file or directory
 
+increment_loading("Updating file system.")
 output("Updating JSON file.")
 json_file = open(working_directory+"/properties.json", "w")
 json_file.write(json.dumps(_json_variables, indent=4, sort_keys=True))
@@ -230,6 +281,10 @@ json_file.close()
 
 # Run the project if main file found and updates went smoothly.
 output("Running project.")
+increment_loading("Running the project.", update_to_full=True, delay=0.5)
+splash_screen.master.withdraw()
+root.update()
+root.update_idletasks()
 
 # if project is written in java
 if main_file().endswith("java"):
