@@ -21,4 +21,4 @@ This project is designed to be used anywhere where updates are frequent or for t
 
 ### Installing
 
-To implement into a working project, deploy the project as the `__init__.py` script with the appropriately completed `properties.json` file ([JSON Wiki](https://github.com/keithallatt/AutoUpdateProject/wiki/JSON)). At the git repository specified in `properties.json`, the entire project, and only the project with any added documentation should be uploaded. Any new **stable** releases should be updated. 
+To implement into a working project, deploy the project as the `__init__.py` script with the appropriately completed `properties.json` file ([Wiki](https://github.com/keithallatt/AutoUpdateProject/wiki/JSON)). At the git repository specified in `properties.json`, the entire project, and only the project with any added documentation should be uploaded. Any new **stable** releases should be updated. 
