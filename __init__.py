@@ -44,7 +44,11 @@ def last_commit_id():
 
 
 def global_code_repository():
-    return str(_json_variables["global code repository"])
+    try:
+        return str(_json_variables["global code repository"])
+    except KeyError:
+        output("No global repository specified")
+        exit(errno.EINVAL)  # Invalid argument
 
 
 def main_file():
