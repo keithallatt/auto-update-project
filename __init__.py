@@ -77,7 +77,9 @@ root.update()
 root.update_idletasks()
 
 
-def increment_loading(text_change=None, update_to_full=False, delay=0):
+def increment_loading(text_change: str=None,
+                      delay: float = 0,
+                      update_to_full: bool=False):
     """
     Increment loading bar by one step (or to completion) to reflect how many
     steps have been taken to load the program.
@@ -248,7 +250,7 @@ if connected_to_internet and update_required:
 
     # check if it downloaded.
     # if it doesn't..
-    if len(list(filter(lambda x: x[0] != ".", os.listdir(".")))) == 0:
+    if len(list(filter(lambda _x: _x[0] != ".", os.listdir(".")))) == 0:
         shutil.rmtree(str(os.getcwd()), ignore_errors=True)
         os.chdir(working_directory)
 
@@ -325,11 +327,12 @@ elif main_file() in os.listdir("."):
 
     f_contents = open(main_file(), "r").readlines()
 
-    line_end = min(21, len(f_contents))
-    line_divide = line_end-3
-    while len(f_contents) > line_end:
-        f_contents.pop(line_divide)
-    f_contents[line_divide] = "\t.\n\t.\n\t.\n"
+    if len(f_contents) > 15:
+        line_end = min(21, len(f_contents))
+        line_divide = line_end-3
+        while len(f_contents) > line_end:
+            f_contents.pop(line_divide)
+        f_contents[line_divide] = "\t.\n\t.\n\t.\n"
     f_contents = "".join(f_contents)
 
     output("\n\n"+f_contents+"\n\n")
