@@ -6,7 +6,7 @@ This project relies on the functionality of git through the command line. The un
 
 ## Getting Started
 
-This project is designed to be used 
+This project is designed to be used anywhere where updates are frequent or for testing purposes. The python script makes no edits to the code downloaded from the git repository online, but simply downloads and runs the code.
 
 ### Prerequisites
 
@@ -19,4 +19,4 @@ This project is designed to be used
 
 ### Installing
 
-To implement into 
+To implement into a working project, deploy the project as the `__init__.py` script with the appropriately completed `properties.json` file.
