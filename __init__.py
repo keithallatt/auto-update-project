@@ -17,7 +17,14 @@ output = print
 
 loading_bar_max = 12
 
-class SplashScreen():
+
+class SplashScreen:
+    """
+        Creates a splash screen with a loading bar, with a percentage loaded.
+
+        The percentage is based off how many 'increment_loading' calls have
+        been made.
+    """
     def __init__(self, master):
         self.master = master
         master.title("Loading")
@@ -55,6 +62,18 @@ root.update_idletasks()
 
 
 def increment_loading(text_change=None, update_to_full=False, delay=0.05):
+    """
+    Increment loading bar by one step (or to completion) to reflect how many
+    steps have been taken to load the program.
+
+    :param text_change:
+        What text to display on the splash screen, if any, for a specific
+        section of code being executed.
+    :param update_to_full:
+        Whether or not to update to a full progress bar.
+    :param delay:
+        How much to delay the function by, in seconds.
+    """
     splash_screen.mpb["value"] += 1
     if update_to_full:
         splash_screen.mpb["value"] = splash_screen.mpb["maximum"]
@@ -99,10 +118,12 @@ local_code_repository = Path(os.getcwd()+local_code_repository)
 
 
 def last_commit_id():
+    """ Return the last commit ID from the git repository """
     return str(_json_variables.get("last update commit", "No Last Commit"))
 
 
 def global_code_repository():
+    """ Return the url for the online git repository """
     try:
         return str(_json_variables["global code repository"])
     except KeyError:
@@ -111,6 +132,7 @@ def global_code_repository():
 
 
 def main_file():
+    """ Return the file path for the main file """
     return str(_json_variables.get("main file", ""))
 
 
