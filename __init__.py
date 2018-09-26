@@ -360,6 +360,6 @@ if main_file().endswith("py"):
     py_ver = "python3"
     if "python2" in [to.lower() for to in project_languages]:
         py_ver = "python2"
-    Popen(["python3", main_file()], stdout=PIPE).wait()
+    Popen([py_ver, main_file()], stdout=PIPE).wait()
 
 os.chdir(working_directory)
