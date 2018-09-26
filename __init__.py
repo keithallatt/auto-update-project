@@ -13,7 +13,13 @@ import sys
 
 system_arguments = sys.argv[1:]
 
-output = print
+
+def output(*args):
+    splash_screen.text.config(state=NORMAL)
+    splash_screen.text.insert(END, " ".join([str(a) for a in args]) + "\n")
+    splash_screen.text.see(END)
+    splash_screen.text.config(state=DISABLED)
+
 
 loading_bar_max = 12
 
@@ -42,11 +48,21 @@ class SplashScreen:
         self.percentage_done = Label(master, text="0%", width=30, height=3)
         self.percentage_done.pack()
 
+        self.scroll = Scrollbar(master)
+        self.text = Text(master, height=8, width=80)
+
+        self.scroll.pack(side=RIGHT, fill=Y)
+        self.text.pack(side=LEFT, fill=Y)
+        self.scroll.config(command=self.text.yview)
+        self.text.config(yscrollcommand=self.scroll.set)
+
+        self.text.pack()
+
 
 root = Tk()
 
-w = 350  # width for the Tk root
-h = 125  # height for the Tk root
+w = 550  # width for the Tk root
+h = 700  # height for the Tk root
 
 # calculate x and y coordinates for the Tk root window
 x = (root.winfo_screenwidth() - w) / 2
@@ -61,7 +77,7 @@ root.update()
 root.update_idletasks()
 
 
-def increment_loading(text_change=None, update_to_full=False, delay=0.05):
+def increment_loading(text_change=None, update_to_full=False, delay=0):
     """
     Increment loading bar by one step (or to completion) to reflect how many
     steps have been taken to load the program.
@@ -85,6 +101,7 @@ def increment_loading(text_change=None, update_to_full=False, delay=0.05):
     splash_screen.percentage_done.config(
         text=str((splash_screen.mpb["value"] * 100) //
                  splash_screen.mpb["maximum"])+"%")
+
     root.update()
     root.update_idletasks()
     time.sleep(delay)
