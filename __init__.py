@@ -308,7 +308,7 @@ increment_loading("Compiling code.")
 # recompile all the java files in-case
 # they are compiled versions of the old code.
 for f in os.listdir("."):
-    # ends with .java but is not a file named '.java'
+    # java file.
     if f.endswith(".java") and f != ".java":
         if main_file() == "":
             f_contents = "".join(open(f).readlines())
@@ -316,6 +316,12 @@ for f in os.listdir("."):
                 _json_variables["main file"] = f
 
         Popen(["javac", f], stdout=PIPE).wait()
+    # python file.
+    if f.endswith(".py") and f != ".py":
+        if main_file() == "":
+            f_contents = "".join(open(f).readlines())
+            if "if __name__ == '__main__':" in f_contents:
+                _json_variables["main file"] = f
 
 
 # Check if main file found.
