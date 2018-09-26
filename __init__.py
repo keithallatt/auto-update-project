@@ -15,23 +15,24 @@ system_arguments = sys.argv[1:]
 
 output = print
 
-loading_bar_max = 16
+loading_bar_max = 12
 
 class SplashScreen():
     def __init__(self, master):
         self.master = master
         master.title("Loading")
 
-        self.label = Label(master, text="Loading", width=30, height=2)
+        self.label = Label(master,
+                           text="Loading", width=30, height=3)
         self.label.pack()
 
-        self.mpb = ttk.Progressbar(master, orient="horizontal", length=200,
+        self.mpb = ttk.Progressbar(master, orient="horizontal", length=300,
                                    mode="determinate")
         self.mpb.pack()
         self.mpb["maximum"] = loading_bar_max
         self.mpb["value"] = 0
 
-        self.percentage_done = Label(master, text="0%", width=30, height=2)
+        self.percentage_done = Label(master, text="0%", width=30, height=3)
         self.percentage_done.pack()
 
 
@@ -171,7 +172,7 @@ if connected_to_internet:
     # if repo doesn't exist, an update is required, there is no code.
     else:
         output(local_code_repository, "does not exist")
-
+        increment_loading()
         update_required = True
 
     # display if an update is required
@@ -217,6 +218,11 @@ if connected_to_internet and update_required:
         Popen(["git", "clone", global_code_repository()], stdout=PIPE).wait()
 
         os.chdir(local_code_repository.absolute())
+    else:
+        increment_loading()
+else:
+    increment_loading()
+
 
 project_languages = []
 project_language_extensions = []
@@ -252,6 +258,8 @@ if "properties.json" in local_code_repository.iterdir():
     for k, v in _json_variables_from_repo.items():
         output("Updated Property:", repr(k), ":", repr(v))
         _json_variables[k] = v
+else:
+    increment_loading()
 os.chdir(local_code_repository.absolute())
 
 
