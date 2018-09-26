@@ -17,6 +17,7 @@ This project is designed to be used anywhere where updates are frequent or for t
 
 **This information must be conveyed to the end users as well. Python and git are required by the system to function.**
 
+*Note: Windows users may be able to use this project if unix commands are useable through the command line. Say, through the use of cygwin. Support is not guaranteed.*
 
 ### Installing
 
