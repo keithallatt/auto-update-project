@@ -86,6 +86,10 @@ if not __headless__:
     splash_screen = SplashScreen(root)
     root.update()
     root.update_idletasks()
+else:
+    # defined variables.
+    splash_screen = None
+    root = None
 
 
 def increment_loading(text_change: str=None,
