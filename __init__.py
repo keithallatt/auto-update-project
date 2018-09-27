@@ -11,15 +11,25 @@ from tkinter import *
 import time
 import sys
 
+
 system_arguments = sys.argv[1:]
 
+# Don't run the project, just download and update.
+__no_run__ = "--no-run" in system_arguments or "-nr" in system_arguments
+# No GUI, just run
+__headless__ = "--headless" in system_arguments or "-h" in system_arguments
 
-def output(*args):
+
+def __output(*args):
     splash_screen.text.config(state=NORMAL)
-    splash_screen.text.insert(END, " ".join([str(a) for a in args]) + "\n")
+    splash_screen.text.insert(END, " ".join([str(a) for a in args]))
     splash_screen.text.see(END)
     splash_screen.text.config(state=DISABLED)
 
+
+if not __headless__:
+    sys.stdout.write = __output
+    sys.stderr.write = __output
 
 loading_bar_max = 12
 
@@ -59,22 +69,23 @@ class SplashScreen:
         self.text.pack()
 
 
-root = Tk()
+if not __headless__:
+    root = Tk()
 
-w = 550  # width for the Tk root
-h = 700  # height for the Tk root
+    w = 550  # width for the Tk root
+    h = 700  # height for the Tk root
 
-# calculate x and y coordinates for the Tk root window
-x = (root.winfo_screenwidth() - w) / 2
-y = (root.winfo_screenheight() - h - 200) / 2
+    # calculate x and y coordinates for the Tk root window
+    x = (root.winfo_screenwidth() - w) / 2
+    y = (root.winfo_screenheight() - h - 200) / 2
 
-# set the dimensions of the screen
-# and where it is placed
-root.geometry('%dx%d+%d+%d' % (w, h, x, y))
+    # set the dimensions of the screen
+    # and where it is placed
+    root.geometry('%dx%d+%d+%d' % (w, h, x, y))
 
-splash_screen = SplashScreen(root)
-root.update()
-root.update_idletasks()
+    splash_screen = SplashScreen(root)
+    root.update()
+    root.update_idletasks()
 
 
 def increment_loading(text_change: str=None,
@@ -92,6 +103,12 @@ def increment_loading(text_change: str=None,
     :param delay:
         How much to delay the function by, in seconds.
     """
+    if __headless__:
+        if text_change is not None:
+            print(">> "+text_change)
+        time.sleep(delay)
+        return
+
     splash_screen.mpb["value"] += 1
     if update_to_full:
         splash_screen.mpb["value"] = splash_screen.mpb["maximum"]
@@ -111,7 +128,7 @@ def increment_loading(text_change: str=None,
 
 increment_loading("Updating Properties.")
 if not ("properties.json" in os.listdir(".")):
-    output("File './properties.json' does not exist:")
+    print("File './properties.json' does not exist:")
     exit(errno.ENOENT)  # No such file or directory
 
 properties_file = open("./properties.json", "r")
@@ -123,7 +140,7 @@ working_directory = os.getcwd()
 local_code_repository = (str(_json_variables["local code repository"]))
 
 if local_code_repository.startswith(".."):
-    output("File Path Not Formatted Correctly")
+    print("File Path Not Formatted Correctly")
     exit(errno.EFTYPE)  # Find write errno code
 if not local_code_repository.startswith("."):
     if local_code_repository.startswith("/"):
@@ -146,7 +163,7 @@ def global_code_repository():
     try:
         return str(_json_variables["global code repository"])
     except KeyError:
-        output("No global repository specified")
+        print("No global repository specified")
         exit(errno.EINVAL)  # Invalid argument
 
 
@@ -179,13 +196,13 @@ update_required = False
 
 # no update if there is no internet
 if connected_to_internet:
-    output("Connected to internet.")
+    print("Connected to internet.")
     # default value, changed when checking output
     out = last_commit_id()
 
     # if the repository exists
     if local_code_repository.name in os.listdir("."):
-        output(local_code_repository, "exists")
+        print(local_code_repository, "exists")
         os.chdir(local_code_repository.absolute())
 
         increment_loading("Updating remotes.")
@@ -198,7 +215,7 @@ if connected_to_internet:
         out = check_output(["git", "status"]).decode("utf-8")
 
         # output log history
-        output("\n".join(out.split("\n")[:10])+"\t.\n\t.\n\t.\n")
+        print("\n".join(out.split("\n")[:10])+"\t.\n\t.\n\t.\n")
 
         out = out.split("\n")[1]
 
@@ -212,18 +229,18 @@ if connected_to_internet:
 
     # if repo doesn't exist, an update is required, there is no code.
     else:
-        output(local_code_repository, "does not exist")
+        print(local_code_repository, "does not exist")
         increment_loading()
         update_required = True
 
     # display if an update is required
-    output("Update Available" if update_required else "Update Not Available")
+    print("Update Available" if update_required else "Update Not Available")
 
     # If there was, update the property
     if update_required:
         _json_variables["last update commit"] = out.strip()
 else:
-    output("No Internet Connection")
+    print("No Internet Connection")
 
 
 # If the local code repository is not
@@ -233,20 +250,21 @@ os.chdir(local_code_repository.absolute())
 
 
 increment_loading("Cleaning the local directory.")
-output("Cleaning the directory...")
+print("Cleaning the directory...")
 Popen(["git", "clean", "-df"], stdout=PIPE).wait()
-output("Done.")
+print("Done.")
 
 
-output("Connected: "+str(connected_to_internet))
-output("Update: "+str(update_required))
+print("Connected: "+str(connected_to_internet))
+print("Update: "+str(update_required))
 
 if connected_to_internet and update_required:
     increment_loading("Updating from git.")
     # git pull of all the source
     Popen(["git", "pull"], stdout=PIPE).wait()
     Popen(["git", "checkout", "."], stdout=PIPE).wait()
-    output("Git Pull Request to 'origin/master'")
+
+    print("Git Pull Request to 'origin/master'")
 
     # check if it downloaded.
     # if it doesn't..
@@ -283,10 +301,10 @@ try:
 
     project_language_extensions = sum(project_language_extensions, [])
 
-    output("Project Languages", project_languages)
-    output("Project Extensions", project_language_extensions)
+    print("Project Languages", project_languages)
+    print("Project Extensions", project_language_extensions)
 except TypeError:
-    output("Error occurred, project languages not configured.")
+    print("Error occurred, project languages not configured.")
     pass
 
 # grab properties.json
@@ -297,7 +315,7 @@ if "properties.json" in local_code_repository.iterdir():
         dict(json.loads("\n".join(
             open(local_code_repository / "properties.json", "r").readlines())))
     for k, v in _json_variables_from_repo.items():
-        output("Updated Property:", repr(k), ":", repr(v))
+        print("Updated Property:", repr(k), ":", repr(v))
         _json_variables[k] = v
 else:
     increment_loading()
@@ -326,10 +344,10 @@ for f in os.listdir("."):
 
 # Check if main file found.
 if main_file() == "":
-    output("Could not find main file.")
+    print("Could not find main file.")
     exit(errno.ENOENT)  # No such file or directory
 elif main_file() in os.listdir("."):
-    output("Found main file:\t" + main_file())
+    print("Found main file:\t" + main_file())
 
     f_contents = open(main_file(), "r").readlines()
 
@@ -341,23 +359,33 @@ elif main_file() in os.listdir("."):
         f_contents[line_divide] = "\t.\n\t.\n\t.\n"
     f_contents = "".join(f_contents)
 
-    output("\n\n"+f_contents+"\n\n")
+    print("\n\n"+f_contents+"\n\n")
 else:
-    output("Specified main file not in local repository:\t"+main_file()+"?")
+    print("Specified main file not in local repository:\t"+main_file()+"?")
     exit(errno.ENOENT)  # No such file or directory
 
 increment_loading("Updating file system.")
-output("Updating JSON file.")
+print("Updating JSON file.")
 json_file = open(working_directory+"/properties.json", "w")
 json_file.write(json.dumps(_json_variables, indent=4, sort_keys=True))
 json_file.close()
 
-# Run the project if main file found and updates went smoothly.
-output("Running project.")
-increment_loading("Running the project.", update_to_full=True, delay=0.5)
-splash_screen.master.withdraw()
-root.update()
-root.update_idletasks()
+if __no_run__:
+    increment_loading("Finishing Up.", update_to_full=True, delay=1.5)
+    if not __headless__:
+        splash_screen.master.withdraw()
+        root.update()
+        root.update_idletasks()
+
+    # finished properly.
+    exit(0)
+else:
+    # Run the project if main file found and updates went smoothly.
+    increment_loading("Running the project.", update_to_full=True, delay=0.5)
+    if not __headless__:
+        splash_screen.master.withdraw()
+        root.update()
+        root.update_idletasks()
 
 # if project is written in java
 if main_file().endswith("java"):
