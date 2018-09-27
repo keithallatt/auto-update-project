@@ -18,6 +18,8 @@ system_arguments = sys.argv[1:]
 __no_run__ = "--no-run" in system_arguments or "-nr" in system_arguments
 # No GUI, just run
 __headless__ = "--headless" in system_arguments or "-h" in system_arguments
+# Help
+__help__ = "--help" in system_arguments
 
 
 def __output(*args):
