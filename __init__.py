@@ -177,7 +177,8 @@ def increment_loading(text_change: str=None,
     if __headless__:
         if text_change is not None:
             print(">> "+text_change)
-        time.sleep(delay)
+        if delay != 0:
+            time.sleep(delay)
         return
 
     splash_screen.mpb["value"] += 1
