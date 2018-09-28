@@ -29,11 +29,42 @@ def __output(*args):
     splash_screen.text.config(state=DISABLED)
 
 
-if not __headless__:
+if not __headless__ and not __help__:
     sys.stdout.write = __output
     sys.stderr.write = __output
 
+
 loading_bar_max = 12
+
+
+if __help__:
+    """
+    Prints the help info to the screen.
+    """
+    help_str = """
+__init__.py help:
+
+Usage:
+    python3 __init__.py [ arg ... ]        
+
+Flags:
+    --no-run / -nr:
+        Do not run the project after updating. Use to update the project either
+        manually or through a different script.
+
+    --headless / -h:
+        Run without use of a GUI. Useful for when used through another script
+        or program, to prevent the built-in GUI from appearing.
+
+** Arguments cannot be mixed together. **
+** '-nrh' will not register with       **
+** either  flag. Use them seperately,  **
+** as '-nr -h' instead.                **
+
+    """.strip()  # to be able to make it more readable.
+
+    print(help_str)
+    exit(0)
 
 
 class SplashScreen:
