@@ -10,16 +10,30 @@ from tkinter import ttk
 from tkinter import *
 import time
 import sys
+import re
 
 
 system_arguments = sys.argv[1:]
 
 # Don't run the project, just download and update.
-__no_run__ = "--no-run" in system_arguments or "-nr" in system_arguments
+__no_run__ = "--no-run" in system_arguments
 # No GUI, just run
-__headless__ = "--headless" in system_arguments or "-h" in system_arguments
+__headless__ = "--headless" in system_arguments
 # Help
 __help__ = "--help" in system_arguments
+# Quiet mode
+__quiet__ = "--quiet" in system_arguments
+
+__sys_arg_regex__ = re.compile("(-[nhq]+)")
+
+for sysarg in system_arguments:
+    if __sys_arg_regex__.match(sysarg) is not None:
+        if "n" in sysarg:
+            __no_run__ = True
+        if "h" in sysarg:
+            __headless__ = True
+        if "q" in sysarg:
+            __quiet__ = True
 
 
 def __output(*args):
@@ -48,7 +62,7 @@ Usage:
     python3 __init__.py [ arg ... ]        
 
 Flags:
-    --no-run / -nr:
+    --no-run / -n:
         Do not run the project after updating. Use to update the project either
         manually or through a different script.
 
@@ -56,10 +70,9 @@ Flags:
         Run without use of a GUI. Useful for when used through another script
         or program, to prevent the built-in GUI from appearing.
 
-** Arguments cannot be mixed together. **
-** '-nrh' will not register with       **
-** either  flag. Use them seperately,  **
-** as '-nr -h' instead.                **
+    --quiet / -q
+        Keep output to a minimum. Won't output anything unless there is a 
+        fatal error.
 
     """.strip()  # to be able to make it more readable.
 
