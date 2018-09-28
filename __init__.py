@@ -332,9 +332,9 @@ print("Update: "+str(update_required))
 
 if connected_to_internet and update_required:
     increment_loading("Updating from git.")
-    # git pull of all the source
-    Popen(["git", "pull"], stdout=PIPE).wait()
-    Popen(["git", "checkout", "."], stdout=PIPE).wait()
+    # git fetch from source, and reset --hard
+    Popen(["git", "fetch", "--all"], stdout=PIPE).wait()
+    Popen(["git", "reset", "--hard", "origin/master"], stdout=PIPE).wait()
 
     print("Git Pull Request to 'origin/master'")
 
