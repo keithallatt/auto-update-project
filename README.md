@@ -33,6 +33,18 @@ For additional support, consider checking the project's wiki, or by creating an 
 
 This interface can be used as a standalone application, bundled into a .app or .exe file or ran as a python script, with an appropriately filled out JSON file and online git repository. This is recommended for projects with graphical user interfaces or headless programs that require no input or can rely on command line arguments.
 
+  ```ditaa {cmd=true args=["-E"]}
+  +--------+   +-------+    +-------+
+  |        | --+ ditaa +--> |       |
+  |  Text  |   +-------+    |diagram|
+  |Document|   |!magic!|    |       |
+  |     {d}|   |       |    |       |
+  +---+----+   +-------+    +-------+
+      :                         ^
+      |       Lots of work      |
+      +-------------------------+
+  ```
+
 ### From the command line
 
 For any project that relies heavily on command line input and output, or runs in the background, or for a project that just needs an update manager, this route works better. Using the command line, command line arguments can control how the program is used, for example, running headless and/or without running the program after the update is complete.
