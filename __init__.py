@@ -1,3 +1,18 @@
+"""
+https://github.com/keithallatt/AutoUpdateProject:
+
+__init__.py:
+
+This script allows for the retrieval of updates for a given 
+project, through command line or graphical interfaces.
+
+Written by Keith Allatt
+Development started September of 2018.
+
+Issues / questions / requests can be taken up on GitHub.
+
+"""
+
 import errno
 from http import client as http_lib
 import json
@@ -24,14 +39,16 @@ __help__ = "--help" in system_arguments
 # Quiet mode
 __quiet__ = "--quiet" in system_arguments
 
-__sys_arg_regex__ = re.compile("(-[nhq]+)")
+__sys_arg_regex__ = re.compile("(-[nhqx]+)")
 
 for sysarg in system_arguments:
     if __sys_arg_regex__.match(sysarg) is not None:
         if "n" in sysarg:
             __no_run__ = True
-        if "h" in sysarg:
+        if "x" in sysarg:
             __headless__ = True
+        if "h" in sysarg:
+            __help__ = True
         if "q" in sysarg:
             __quiet__ = True
 
@@ -62,11 +79,14 @@ Usage:
     python3 __init__.py [ arg ... ]        
 
 Flags:
+    --help / -h:
+        Get help, shows this document again.
+
     --no-run / -n:
         Do not run the project after updating. Use to update the project either
         manually or through a different script.
 
-    --headless / -h:
+    --headless / -x:
         Run without use of a GUI. Useful for when used through another script
         or program, to prevent the built-in GUI from appearing.
 
