@@ -60,6 +60,7 @@ def __output(*args):
     splash_screen.text.config(state=DISABLED)
 
 
+# if its not headless: output is redirected to __output
 if not __headless__ and not __help__:
     sys.stdout.write = __output
     sys.stderr.write = __output
