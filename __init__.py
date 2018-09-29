@@ -98,6 +98,9 @@ Flags:
     --quiet / -q
         Keep output to a minimum. Won't output anything unless there is a 
         fatal error.
+        
+    --clone / -c
+        Delete and re-clone the repository.
 
     """.strip()  # to be able to make it more readable.
 
