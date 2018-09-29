@@ -38,8 +38,10 @@ __headless__ = "--headless" in system_arguments
 __help__ = "--help" in system_arguments
 # Quiet mode
 __quiet__ = "--quiet" in system_arguments
+# Clone mode
+__clone__ = "--clone" in system_arguments
 
-__sys_arg_regex__ = re.compile("(-[nhqx]+)")
+__sys_arg_regex__ = re.compile("(-[nhqxc]+)")
 
 for sysarg in system_arguments:
     if __sys_arg_regex__.match(sysarg) is not None:
@@ -51,6 +53,8 @@ for sysarg in system_arguments:
             __help__ = True
         if "q" in sysarg:
             __quiet__ = True
+        if "c" in sysarg:
+            __clone__ = True
 
 
 def __output(*args):
@@ -330,17 +334,21 @@ print("Done.")
 print("Connected: "+str(connected_to_internet))
 print("Update: "+str(update_required))
 
-if connected_to_internet and update_required:
+if connected_to_internet and (update_required or __clone__):
     increment_loading("Updating from git.")
+
+    Popen(["git", "pull"], stdout=PIPE).wait()
+    Popen(["git", "checkout", "HEAD"], stdout=PIPE).wait()
     # git fetch from source, and reset --hard
     Popen(["git", "fetch", "--all"], stdout=PIPE).wait()
-    Popen(["git", "reset", "--hard", "origin/master"], stdout=PIPE).wait()
+    Popen(["git", "reset", "--hard", "HEAD"], stdout=PIPE).wait()
 
     print("Git Pull Request to 'origin/master'")
 
     # check if it downloaded.
     # if it doesn't..
-    if len(list(filter(lambda _x: _x[0] != ".", os.listdir(".")))) == 0:
+    if len(list(filter(lambda _x: _x[0] != ".", os.listdir(".")))) == 0 \
+            or __clone__:
         shutil.rmtree(str(os.getcwd()), ignore_errors=True)
         os.chdir(working_directory)
 

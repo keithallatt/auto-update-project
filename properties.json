@@ -8,10 +8,10 @@
             ".py"
         ]
     },
-    "last update commit": "ce2f677584426a43c9f9954adadea988b5a99d15\n",
+    "last update commit": "e21558992a0306b0de60a9fe2258a64fedcc6317\n",
     "local code repository": "./repo",
-    "main file": "java_class.java",
+    "main file": "python_script.py",
     "project languages": [
-        "Java"
+        "Python"
     ]
 }
