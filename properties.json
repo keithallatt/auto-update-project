@@ -1,5 +1,5 @@
 {
-    "global code repository": "https://github.com/keithallatt/repo.git",
+    "global code repository": "#",
     "language extensions": {
         "Java": [
             ".java"
@@ -8,10 +8,10 @@
             ".py"
         ]
     },
-    "last update commit": "e21558992a0306b0de60a9fe2258a64fedcc6317",
-    "local code repository": "./repo",
-    "main file": "python_script.py",
+    "last update commit": "#",
+    "local code repository": "./#",
+    "main file": "#",
     "project languages": [
-        "Python"
+        "#"
     ]
 }
