@@ -4,10 +4,10 @@ This project is aimed at creating an interface, consisting of a python script an
 
 This project relies on the functionality of git through the command line. As an example, the unix command `git clone https://github.com/keithallatt/repo` would clone the repositort `repo` from my GitHub page into a local git repository on the users system, and `git pull`/`git fetch` is used to gather any updates and apply them in the local git repository.
 
-## What I Learned
-- Using Python to access the command line.
-- Using git and GitHub to host software.
-- Creating 'useful' software for general purpose use.
+## What I'm Learning
+- How to use Python to access the command line.
+- How to use git and GitHub to host software.
+- How to create 'useful' software for general purpose use.
 
 ## Getting Started
 
